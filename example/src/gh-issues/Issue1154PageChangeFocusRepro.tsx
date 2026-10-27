@@ -36,6 +36,7 @@ export function Issue1154PageChangeFocusRepro() {
   const [fix1202, setFix1202] = useState(
     () => Settings.get('PagerViewFix1202') === true
   );
+  const [reproRunning, setReproRunning] = useState(false);
   const log = (event: string) =>
     setEvents((current) => [...current.slice(-11), event]);
 
@@ -50,6 +51,32 @@ export function Issue1154PageChangeFocusRepro() {
     followUpCommand.current =
       selectedPage === first ? null : { at: first, go: second };
     pagerRef.current?.setPage(first);
+  };
+
+  // THROWAWAY (#1202 repro branch): the manual steps, run in code so the
+  // timing does not depend on how fast someone taps. Each step focuses the
+  // current page's input and then goes to the next page, like tapping Go.
+  const runRepro = async () => {
+    const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    setReproRunning(true);
+    const steps: Array<[number | null, number]> = [
+      [0, 1],
+      [1, 2],
+      [2, 1],
+      [1, 0],
+      [0, 1],
+      [null, 2],
+    ];
+    for (const [focus, go] of steps) {
+      if (focus !== null) {
+        inputRefs.current[focus]?.focus();
+        await wait(1000);
+      }
+      startCommand();
+      pagerRef.current?.setPage(go);
+      await wait(2000);
+    }
+    setReproRunning(false);
   };
 
   useEffect(() => {
@@ -83,6 +110,14 @@ export function Issue1154PageChangeFocusRepro() {
             Settings.set({ PagerViewFix1202: value });
             setFix1202(value);
           }}
+        />
+      </View>
+      <View style={styles.buttons}>
+        <Button
+          testID="run-1202-repro"
+          title={reproRunning ? 'Running…' : 'Run #1202 repro'}
+          disabled={reproRunning}
+          onPress={runRepro}
         />
       </View>
       <Text testID="issue-1154-events" style={styles.events}>
