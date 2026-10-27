@@ -57,7 +57,7 @@ export function Issue1154PageChangeFocusRepro() {
   // timing does not depend on how fast someone taps. Each step focuses the
   // current page's input and then goes to the next page, like tapping Go.
   const runRepro = async () => {
-    const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
     setReproRunning(true);
     const steps: Array<[number | null, number]> = [
       [0, 1],
