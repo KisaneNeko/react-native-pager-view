@@ -8,7 +8,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   Button,
   Keyboard,
+  Settings,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   View,
@@ -30,6 +32,10 @@ export function Issue1154PageChangeFocusRepro() {
     'off' | 'onSelected' | 'onPress'
   >('off');
   const inputRefs = useRef<Array<TextInputInstance | null>>([]);
+  // THROWAWAY (#1202 repro branch): turns the #1203 fix on and off natively.
+  const [fix1202, setFix1202] = useState(
+    () => Settings.get('PagerViewFix1202') === true
+  );
   const log = (event: string) =>
     setEvents((current) => [...current.slice(-11), event]);
 
@@ -68,6 +74,17 @@ export function Issue1154PageChangeFocusRepro() {
         {focusedInput === null ? 'none' : `input ${focusedInput}`} | Keyboard:{' '}
         {keyboardVisible ? 'visible' : 'hidden'}
       </Text>
+      <View style={styles.fixRow}>
+        <Text>Fix #1202 (blank page)</Text>
+        <Switch
+          testID="fix-1202-switch"
+          value={fix1202}
+          onValueChange={(value) => {
+            Settings.set({ PagerViewFix1202: value });
+            setFix1202(value);
+          }}
+        />
+      </View>
       <Text testID="issue-1154-events" style={styles.events}>
         Events: {events.join(', ')}
       </Text>
@@ -178,6 +195,13 @@ export function Issue1154PageChangeFocusRepro() {
 }
 
 const styles = StyleSheet.create({
+  fixRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+    paddingBottom: 8,
+  },
   screen: {
     flex: 1,
   },

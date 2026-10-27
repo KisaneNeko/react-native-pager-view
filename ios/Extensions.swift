@@ -30,6 +30,22 @@ class PageChildViewController: UIViewController {
     }
   }
 
+  /// THROWAWAY (#1202 repro branch): the fix from #1203, behind the
+  /// "Fix #1202" switch on the #1154 repro screen.
+  static var reclaimEnabled: Bool {
+    UserDefaults.standard.bool(forKey: "PagerViewFix1202")
+  }
+
+  /// SwiftUI can host one page in two controllers. When the newer one goes
+  /// away, the page view is left without a parent, so take it back here.
+  func reclaimWrappedViewIfOrphaned() {
+    guard Self.reclaimEnabled, let wrappedView, wrappedView.superview == nil else {
+      return
+    }
+    NSLog("PVFIX1202 reclaimed an orphaned page view")
+    view.addSubview(wrappedView)
+  }
+
   override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
     propagateSafeArea()
