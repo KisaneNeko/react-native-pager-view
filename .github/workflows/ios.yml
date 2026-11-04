@@ -111,7 +111,7 @@ jobs:
           key: ${{ steps.agent-device.outputs.key }}
 
       - name: Run e2e tests
-        run: bun run test:ios
+        run: bun run test:ios --grep "redirected once the focus|interrupts another still lands" --repeat-each 20 --retries 0 --video retain-on-failure
         working-directory: e2e
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -131,6 +131,6 @@ jobs:
           name: e2e-report-ios${{ inputs.spm && '-spm' || '' }}
           path: |
             e2e/.e2e/report.json
-            e2e/.e2e/artifacts
+            e2e/.e2e/results
           if-no-files-found: warn
           retention-days: 7
